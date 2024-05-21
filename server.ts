@@ -1,7 +1,8 @@
 import express, { json } from 'express';
 import dotenv from 'dotenv';
-import {connectDB} from './DB/index';
-import { Msg ,errorMsg } from './constant/message';
+import {connectDB} from './src/DB/index';
+import { Msg ,errorMsg } from './src/constant/message';
+import userRouter from './src/routes/user.routes';
 
 
 
@@ -23,4 +24,4 @@ connectDB().then(()=>{
 });
 
 
-app.use('/')
+app.use('/user' , userRouter)
