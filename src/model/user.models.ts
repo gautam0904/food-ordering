@@ -27,7 +27,7 @@ const userSchema : mongoose.Schema<userInterace> = new mongoose.Schema({
         enum :  Object.values(usertypevalues),
         required: [true ,`${errorMsg.requiredRole}`]
     }
-});
+},{timestamps :true});
 
 userSchema.pre('save',async function(next){
     if(!this.isModified("password")) return next();

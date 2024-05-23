@@ -6,6 +6,7 @@ import { statuscode } from "../constant/statusCode";
 import { errorMsg } from "../constant/message";
 
 const user = new userService()
+// const restaurant = new 
 
 export const signup = async (req: Request, res: Response) => {
     try {
@@ -14,15 +15,16 @@ export const signup = async (req: Request, res: Response) => {
             throw new ApiError(statuscode.NotAcceptable, errorMsg.requiredFields);
         }
 
+        // signupData.usertype == "owner"? 
+
         const created_user = await user.createUser(signupData);
         
-        
         res.status(created_user.statuscode).json(created_user.content);
+
     } catch (error: any) {
         res.status(error.statuscode).json({ message: error.message });
     }
 }
-
 
 export const login = async (req : Request , res : Response) => {
     try {
@@ -35,5 +37,18 @@ export const login = async (req : Request , res : Response) => {
         res.status(login_user.statuscode).json(login_user.content);
     } catch (error : any) {
         res.status(error.statuscode).json({message : error.message})
+    }
+}
+
+export const Delete = async (req: Request, res: Response) =>{
+    try {
+        const id = req.body;
+        if (id.trim() == "") {
+            throw new ApiError(statuscode.NotAcceptable, errorMsg.requiredFields);
+        }
+        const deleted_user = await user.deleteUser(id);
+        res.status(deleted_user.statuscode).json(deleted_user.content);
+    } catch (error : any) {
+        res.status(error.status).json({message: error.message})
     }
 }

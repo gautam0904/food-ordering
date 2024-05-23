@@ -3,6 +3,7 @@ import dotenv from 'dotenv';
 import {connectDB} from './src/DB/index';
 import { Msg ,errorMsg } from './src/constant/message';
 import userRouter from './src/routes/user.routes';
+import RestaurantRouter from './src/routes/resturent.routes';
 
 
 
@@ -24,4 +25,5 @@ connectDB().then(()=>{
 });
 
 
-app.use('/user' , userRouter)
+app.use('/user' , userRouter);
+app.use('/restaurant' , RestaurantRouter)

@@ -4,5 +4,6 @@ export const statuscode ={
     NotImplemented : 501,
     Conflict : 409 ,
     NoteFound : 404,
-    Unauthorized : 401 
+    Unauthorized : 401 ,
+    forbidden : 403,
 }
