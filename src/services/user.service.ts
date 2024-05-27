@@ -1,4 +1,4 @@
-import { userInterace } from "../interface/model.interface";
+import { Iuser } from "../interface/model.interface";
 import { statuscode } from "../constant/statusCode";
 import { Msg, errorMsg } from "../constant/message";
 import User from "../model/user.models";
@@ -6,13 +6,14 @@ import { ApiError } from "../utility/ApiError";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { RestaurantService } from "./restaurant .service";
-import { createRestaurantInterface } from "../interface/request.interface";
+import { IcreateRestaurant, IupdateUser } from "../interface/request.interface";
+import mongoose, { isValidObjectId } from "mongoose";
 
-const restaurant = new RestaurantService()
+const restaurant = new RestaurantService();
 
 export class userService {
   async createUser(
-    userdata: userInterace
+    userdata: Iuser
   ): Promise<{ statuscode: number; content: object }> {
     try {
       const existuser = await User.findOne({ email: userdata.email });
@@ -29,24 +30,23 @@ export class userService {
         profilePicture: userdata.profilePicture,
       });
 
-      const resturantData : createRestaurantInterface= {
-        restaurantName : userdata.name
-      }
+      const resturantData: IcreateRestaurant = {
+        restaurantName: userdata.name,
+      };
 
-      if (userdata.usertype === 'owner') {
-        const createdRestuarant = await restaurant.createRestaurant(resturantData);
+      if (userdata.usertype === "owner") {
         return {
           statuscode: statuscode.ok,
-          content: { message: `${Msg.usercreated} \n ${Msg.restaurantCreated} \n ${createdRestuarant}` },
-        }
+          content: {
+            message: `${Msg.usercreated} \n ${Msg.restaurantCreated} with ${userdata.name} as restaurent name you can update it `,
+          },
+        };
+      } else {
+        return {
+          statuscode: statuscode.ok,
+          content: { message: `${Msg.usercreated}` },
+        };
       }
-      else{
-      
-      return {
-        statuscode: statuscode.ok,
-        content: { message: `${Msg.usercreated}` },
-      }
-    };
     } catch (error: any) {
       return {
         statuscode: error.statusCode || statuscode.NotImplemented,
@@ -55,7 +55,7 @@ export class userService {
     }
   }
 
-  async loginUser(logindata: userInterace) {
+  async loginUser(logindata: Iuser) {
     try {
       const existuser = await User.findOne({ email: logindata.email });
 
@@ -67,28 +67,32 @@ export class userService {
         existuser.password
       );
 
-      if (!isMach) throw new ApiError(statuscode.Unauthorized , `${errorMsg.passwordNotMatch}`);
-      let AccessToken : string = "access_token" ;
-      
-      
-  
-       AccessToken = jwt.sign({
-          id: existuser._id,
-          userType: existuser.usertype
-      },(process.env.AccessTokenSeceret as string) ,
-          {
-              expiresIn: process.env.AccessExpire,
-          }
-      );
-    
-      return {
-        statuscode : statuscode.ok,
-        content : {
-            message : `${Msg.loginSuccess}`,
-            AccessToken
+      if (!isMach)
+        throw new ApiError(
+          statuscode.Unauthorized,
+          `${errorMsg.passwordNotMatch}`
+        );
+      let AccessToken: string = "access_token";
+
+      AccessToken = jwt.sign(
+        {
+          userID: existuser._id,
+          userType: existuser.usertype,
+        },
+        process.env.AccessTokenSeceret as string,
+        {
+          expiresIn: process.env.AccessExpire,
         }
-      }
-    } catch (error :any) {
+      );
+
+      return {
+        statuscode: statuscode.ok,
+        content: {
+          message: `${Msg.loginSuccess}`,
+          AccessToken,
+        },
+      };
+    } catch (error: any) {
       return {
         statuscode: error.statusCode || statuscode.NotImplemented,
         content: { message: error.message },
@@ -96,22 +100,176 @@ export class userService {
     }
   }
 
-  async deleteUser(userId : string){
+  async deleteUser(userId: string) {
     try {
-      const existUser = await User.findOne({_id : userId});
-      if(!existUser) throw new ApiError(statuscode.NoteFound, `${errorMsg.notExistUser}`);
-      User.deleteOne({_id : userId});
-      return{
-        statuscode : statuscode.ok,
-        content : {message : Msg.deleteuser}
+      const existUser = await User.findOne({ _id: userId });
+
+      if (!existUser) {
+        throw new ApiError(statuscode.NoteFound, `${errorMsg.notExistUser}`);
       }
-    } catch (error : any) {
+      const result = await User.findByIdAndUpdate(
+        { _id: existUser._id },
+        {
+          $set: {
+            isDeleted: true,
+          },
+        },
+        { new: true }
+      );
       return {
-        statuscode : error.statusCode || statuscode.NotImplemented,
-        content :{message : error.message}
+        statuscode: statuscode.ok,
+        content: {
+          message: Msg.deleteuser,
+        },
+      };
+    } catch (error: any) {
+      return {
+        statuscode: error.statusCode || statuscode.NotImplemented,
+        content: { message: error.message },
+      };
+    }
+  }
+
+  async getAlluser() {
+    try {
+      const users = await User.aggregate([
+        {
+          $match: {
+            isDeleted: false,
+          },
+        },
+        {
+          $project: {
+            name: 1,
+            email: 1,
+            usertype: 1,
+          },
+        },
+      ]);
+      if (users) {
+        return {
+          statuscode: statuscode.ok,
+          content: { users },
+        };
+      } else {
+        throw new ApiError(statuscode.NoteFound, `${errorMsg.userNotFound}`);
+      }
+    } catch (error: any) {
+      return {
+        statuscode: error.statusCode || statuscode.NotImplemented,
+        content: { message: error.message },
+      };
+    }
+  }
+
+  async updateUser(updateData: IupdateUser) {
+    try {
+      const result = await User.findByIdAndUpdate(
+        {
+          _id: updateData.id,
+        },
+        {
+          $set: {
+            usertype: updateData.role,
+          },
+        },
+        { new: true }
+      );
+      if (result) {
+        return {
+          statuscode: statuscode.ok,
+          content: result,
+        };
+      }
+      throw new ApiError(statuscode.NotImplemented, errorMsg.updateUser);
+    } catch (error: any) {
+      return {
+        statuscode: error.statusCode || statuscode.NotImplemented,
+        content: error.message,
+      };
+    }
+  }
+
+  async getAlldeletedUsers() {
+    try {
+      const allDeletedUsers = await User.aggregate([
+        {
+          "$match": {
+            "isDeleted": true
+          }
+        },
+        {
+          "$group": {
+            "_id": null,
+            "name" : {
+              $push :{ "name " :  "$name","id" : "$_id"}
+            },
+            "deletedCount": {
+              "$sum": 1
+            }
+          }
+        },{
+          $unwind: {
+            path: "$name",
+          }
+        },
+        {
+          "$project": {
+            "_id": 1,
+            "name": 1, 
+            "deletedCount": 1
+          }
+        }]);
+      if (!allDeletedUsers) {
+        throw new ApiError(statuscode.NoteFound, errorMsg.notFoundDeleted);
+      }
+      return {
+        statuscode : statuscode.ok,
+        content : allDeletedUsers
+      }
+    } catch (error: any) {
+      return {
+        statuscode: error.statusCode || statuscode.NotImplemented,
+        content: error.message,
+      };
+    }
+  }
+
+  async retrieviedUser (userID : string){
+    try {
+
+      if(!isValidObjectId(userID)){
+        throw new ApiError(statuscode.NotAcceptable , `${errorMsg.invalidID}`)
+      }
+      const deletedexistUser = await User.findOne({ _id: userID.trim() });
+
+      if (!deletedexistUser) {
+        throw new ApiError (statuscode.NoteFound , errorMsg.notExistUser)
+      }
+      const result =  await User.findByIdAndUpdate(
+        {_id : deletedexistUser._id},
+        {
+          $set : {
+            isDeleted : false
+          }
+        },
+        {new : true}
+      );
+      
+      if(!result){
+        throw new ApiError (statuscode.NotImplemented ,`${errorMsg}`)
+      }
+      return {
+        statuscode : statuscode.ok,
+        content : Msg.retreiveUser
+      }
+    } catch (error : any ) {
+      return{
+        statuscode: error.statusCode || statuscode.NotImplemented,
+        content: error.message,
       }
     }
   }
 
-  
+
 }

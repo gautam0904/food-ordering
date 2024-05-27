@@ -24,6 +24,7 @@ connectDB().then(()=>{
     console.log(error);
 });
 
-
+//  postman document link
+//  https://documenter.getpostman.com/view/34230594/2sA3Qs9rW3
 app.use('/user' , userRouter);
 app.use('/restaurant' , RestaurantRouter)

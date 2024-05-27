@@ -1,8 +1,8 @@
 import mongoose from 'mongoose'
-import { foodInterface } from '../interface/model.interface'
+import {Ifood } from '../interface/model.interface'
 import { Msg, errorMsg } from '../constant/message'
 
-const foodSchema :mongoose.Schema<foodInterface> = new mongoose.Schema({
+const foodSchema :mongoose.Schema<Ifood> = new mongoose.Schema({
     foodName : {
         type : String,
         required : [true ,errorMsg.requiredFoodNmae]
@@ -16,7 +16,7 @@ const foodSchema :mongoose.Schema<foodInterface> = new mongoose.Schema({
     }
 },{timestamps : true});
 
-const Food : mongoose.Model<foodInterface> = mongoose.model("Food",foodSchema);
+const Food : mongoose.Model<Ifood> = mongoose.model("Food",foodSchema);
 
 export default Food;
 

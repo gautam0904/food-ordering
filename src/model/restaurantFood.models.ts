@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
-import { restaurantFoodInterface } from "../interface/model.interface";
+import { IrestaurantFood } from "../interface/model.interface";
 
-const restaurantFoodSechema : mongoose.Schema<restaurantFoodInterface> =new mongoose.Schema({
+const restaurantFoodSechema : mongoose.Schema<IrestaurantFood> =new mongoose.Schema({
     foodId :{
         type : mongoose.Schema.Types.ObjectId,
         ref : "Food",

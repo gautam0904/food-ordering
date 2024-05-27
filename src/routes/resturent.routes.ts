@@ -1,12 +1,13 @@
 import express from "express";
-import { createRestaurant ,getRestaurant } from "../controller/restaurant.controller";
+import { create ,get,Delete , update } from "../controller/restaurant.controller";
 import { authMiddle } from "../middleware/auth.middleware";
 import { rolmiddle } from "../middleware/role.middleware";
 
 const RestaurantRouter = express.Router();
 
-RestaurantRouter.post('/create',authMiddle,rolmiddle, createRestaurant);
-RestaurantRouter.get('/get',authMiddle,rolmiddle, getRestaurant);
-RestaurantRouter.put('/update',authMiddle )
+RestaurantRouter.post('/create',authMiddle,rolmiddle, create);
+RestaurantRouter.get('/get',authMiddle,rolmiddle, get);
+RestaurantRouter.put('/update',authMiddle,rolmiddle,update );
+RestaurantRouter.delete('/delete' ,authMiddle,rolmiddle, Delete);
 
 export default RestaurantRouter;

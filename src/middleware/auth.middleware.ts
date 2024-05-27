@@ -26,10 +26,9 @@ export const authMiddle = async (req: Request, res: Response, next: NextFunction
         process.env.AccessTokenSeceret as jwt.Secret
       );
       
-      req.body.USERID = (decoded as JwtPayload).id;
-      const user = await User.findOne({_id : (decoded as JwtPayload).id})        
-      req.body.USERTYPE = user?.usertype;
-
+      req.body.USERID = (decoded as JwtPayload).userID;
+      const user = await User.findOne({_id : (decoded as JwtPayload).userID})        
+      req.body.USERTYPE = user?.usertype;      
       next();
     } catch (err: any) {
       throw new ApiError(statuscode.Unauthorized,`${errorMsg.expiredToken}`);

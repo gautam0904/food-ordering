@@ -1,11 +1,12 @@
-import { userInterace } from "../interface/model.interface";
+import { Iuser } from "../interface/model.interface";
+import Restaurant from "./restaurant.models";
 import mongoose from "mongoose";
 import bcrypt from "bcrypt";
 import { Msg, errorMsg } from "../constant/message";
 
 const usertypevalues = ['owner' , 'customer' , 'admin']
 
-const userSchema : mongoose.Schema<userInterace> = new mongoose.Schema({
+const userSchema : mongoose.Schema<Iuser> = new mongoose.Schema({
     name: {
         type: String,
         required: [true , `${errorMsg.requiredName}`]
@@ -26,16 +27,30 @@ const userSchema : mongoose.Schema<userInterace> = new mongoose.Schema({
         type: String,
         enum :  Object.values(usertypevalues),
         required: [true ,`${errorMsg.requiredRole}`]
-    }
+    },
+    isDeleted :{
+        type :Boolean,
+        default : false
+    },
 },{timestamps :true});
 
 userSchema.pre('save',async function(next){
-    if(!this.isModified("password")) return next();
+    if(!this.isModified("password" )) return next();
     this.password = await bcrypt.hash(this.password , 12);
     next();
-})
+});
 
-const User : mongoose.Model<userInterace> = mongoose.model("User",userSchema);
+userSchema.pre('save' , async function(next){
+    if(this.usertype == "owner"){
+        Restaurant.create({
+            restaurantName : this.name,
+            restaurantOwner : this._id
+        })
+    }
+});
+
+
+const User : mongoose.Model<Iuser> = mongoose.model("User",userSchema);
 
 
 

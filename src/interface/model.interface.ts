@@ -1,27 +1,28 @@
 import mongoose from "mongoose";
 
-export interface userInterace extends Document {
+export interface Iuser extends Document {
     name: string;
     email: string;
     password: string;
     profilePicture?: string;
     usertype: string;
+    isDeleted : boolean;
     isPasswordCorrect(password: string): Promise<boolean>; 
 }
 
-export interface foodInterface extends Document{
+export interface Ifood extends Document{
     foodName : string;
     price:number;
     picture : string;
 }
 
-export interface restaurantFoodInterface extends Document{
+export interface IrestaurantFood extends Document{
     foodId : mongoose.Schema.Types.ObjectId;
     restaurentId : mongoose.Schema.Types.ObjectId;
     status : boolean;
 }
 
-export interface restaurantInterFace extends Document {
+export interface Irestaurant extends Document {
     restaurantName : string; 
     restaurantOwner : mongoose.Schema.Types.ObjectId;
 
