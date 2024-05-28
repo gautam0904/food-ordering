@@ -10,9 +10,12 @@ const restaurantSchema : mongoose.Schema<Irestaurant> = new mongoose.Schema({
     restaurantOwner : {
         type : mongoose.Schema.Types.ObjectId,
         ref : "User"
+    },
+    isDeleted : {
+        type : Boolean,
+        default : false
     }
-
-});
+} , { timestamps : true});
 
 const Restaurant = mongoose.model('Restaurent' , restaurantSchema);
 

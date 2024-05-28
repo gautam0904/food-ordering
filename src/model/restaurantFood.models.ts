@@ -13,6 +13,10 @@ const restaurantFoodSechema : mongoose.Schema<IrestaurantFood> =new mongoose.Sch
     status: {
         type : Boolean,
         default : true ,
+    },
+    isDeleted : {
+        type : Boolean,
+        default : false,
     }
 } ,{timestamps : true});
 

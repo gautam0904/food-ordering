@@ -13,6 +13,10 @@ const foodSchema :mongoose.Schema<Ifood> = new mongoose.Schema({
     },
     picture :{
         type :String
+    },
+    isDeleted :{
+        type :Boolean,
+        default : false
     }
 },{timestamps : true});
 
