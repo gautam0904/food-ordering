@@ -8,6 +8,10 @@ export const Msg ={
     deleteuser : `User is deleted successfully`,
     restaurantCreated : `Restaurant is created successfully `,
     retreiveUser : `User is retrieved successfully`,
+    restaurantDeleted : `Restaurant is deleted successfully`,
+    restaurantUpdated : `Restaurant is updated successfully`,
+    restaurantRetrieved : `Restaurant is retrieved successfully`,
+
 }
 
 export const errorMsg ={
@@ -37,4 +41,5 @@ export const errorMsg ={
     notFoundDeleted : `Tere is no deleted user`,
     retreiveUser : `User is not retrieved`,
     invalidID : `Invalid object ID`,
+    RestaurantOwner :`Restaurant owner can only be access own restaurants`
 }

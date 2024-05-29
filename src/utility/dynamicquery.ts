@@ -14,7 +14,6 @@ export class DynamicQueries {
   async filter(
     NumberFields: Array<object>,
     stringFields: Array<object>,
-    DateFields: Array<object>
   ) {
     const andArray: Array<object> = [];
 
@@ -38,25 +37,8 @@ export class DynamicQueries {
       });
     });
 
-
-
-
-    DateFields.forEach(function (field: { [key: string]: any }) {
-        Object.keys(field).forEach((key) => {
-            let startDate = new Date(`${field[key][0]}T00:00:00Z`);
-            let endDate = new Date(`${field[key][1]}T23:59:59Z`);
-    
-            let filter : { [key: string]: any }= {};
-            filter[key] = {
-                '$gte': startDate,
-                '$lte': endDate
-            };
-    
-            andArray.push(filter);
-        });
-    });
-
-
     return andArray;
   }
 }
+
+

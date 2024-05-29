@@ -5,7 +5,8 @@ import { errorMsg } from "../constant/message";
 const restaurantSchema : mongoose.Schema<Irestaurant> = new mongoose.Schema({
     restaurantName : {
         type : String,
-        required : [true, errorMsg.requiredRestaurantName]
+        required : [true, errorMsg.requiredRestaurantName],
+        unique : true
     },
     restaurantOwner : {
         type : mongoose.Schema.Types.ObjectId,

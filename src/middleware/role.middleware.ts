@@ -4,8 +4,8 @@ import { ApiError } from "../utility/ApiError";
 import { errorMsg } from "../constant/message";
 
 const permission = {
-  admin: [`/restaurant/create`, `/user/delete`, `/user/get`, `/user/update`,`/user/getDeleted` ,`/user/retreive`,`/restaurant/get`],
-  owner: [`/restaurant/create`],
+  admin: [`/restaurant/create`, `/user/delete`, `/user/get`, `/user/update`,`/user/getDeleted` ,`/user/retreive`,`/restaurant/get`,`/restaurant/update`,`/restaurant/delete`,`/restaurant/retreive`],
+  owner: [`/restaurant/create`,`/restaurant/update`,`/restaurant/delete`,`/restaurant/retreive`],
   customer: [`/restaurant/get`],
 };
 

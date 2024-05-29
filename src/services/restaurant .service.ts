@@ -1,14 +1,16 @@
 import { create } from "ts-node";
-import { Msg } from "../constant/message";
+import { Msg, errorMsg } from "../constant/message";
 import { statuscode } from "../constant/statusCode";
 import {
   IcreateRestaurant,
   IgetRestaurant,
   IgetRestaurantHeader,
+  IretrievedRestaurant,
+  IupdateRestaurant,
 } from "../interface/request.interface";
 import Restaurant from "../model/restaurant.models";
 import { DynamicQueries } from "../utility/dynamicquery";
-type IsoDate = Date;
+import { ApiError } from "../utility/ApiError";
 
 const dynamicQueries = new DynamicQueries();
 
@@ -54,14 +56,6 @@ export class RestaurantService {
               : {},
           },
           { ownerName: restaurantData.owner ? restaurantData.owner : {} },
-        ],
-        [
-          {
-            createdAt: [
-              restaurantData.startCreated ? restaurantData.startCreated : {},
-              restaurantData.endCreated ? restaurantData.endCreated : {},
-            ],
-          },
         ]
       );
 
@@ -85,6 +79,7 @@ export class RestaurantService {
           $project: {
             restaurantName: 1,
             ownerName: "$owner.name",
+            isDeleted: 1,
             createdAt: 1,
           },
         },
@@ -98,15 +93,138 @@ export class RestaurantService {
         { $skip: skip },
         { $limit: limit },
       ];
-      console.log(dyanamicPipeline);
-      console.log(filter);
-      console.log(serarch);
 
       const result = await Restaurant.aggregate(dyanamicPipeline);
 
       return {
         statuscode: statuscode.ok,
         content: result,
+      };
+    } catch (error: any) {
+      return {
+        statuscode: error.statuscode || statuscode.NotImplemented,
+        content: {
+          message: error.message,
+        },
+      };
+    }
+  }
+
+  async deleteRestaurant(restaurantData: { restaurantName: string }) {
+    try {
+      const result = await Restaurant.findOneAndUpdate(
+        { restaurantName: restaurantData.restaurantName },
+        {
+          $set: {
+            isDeleted: true,
+          },
+        },
+        { new: true }
+      );
+      return {
+        statuscode: statuscode.ok,
+        content: {
+          message: `${Msg.restaurantDeleted}`,
+        },
+      };
+    } catch (error: any) {
+      return {
+        statuscode: error.statuscode || statuscode.NotImplemented,
+        content: {
+          message: error.message,
+        },
+      };
+    }
+  }
+
+   
+
+  async updateRestaurant(restaurantData: IupdateRestaurant) {
+    try {
+      const restaurant: any = await Restaurant.findOne({
+        restaurantName: restaurantData.restaurantName,
+      });
+      
+      if (
+        restaurantData.USERTYPE == "owner" &&
+        restaurant.restaurantOwner != restaurantData.USERID
+      ) {
+        throw new ApiError(
+          statuscode.NotAcceptable,
+          errorMsg.RestaurantOwner
+        );
+      }
+      const result = await Restaurant.findOneAndUpdate(
+        { restaurantName: restaurantData.restaurantName },
+        {
+          $set: {
+            restaurantName: restaurantData.updatedrestaurantName,
+          },
+        },
+        { new: true }
+      );
+      return {
+        statuscode: statuscode.ok,
+        content: {
+          message: `${Msg.restaurantUpdated}`,
+        },
+      };
+    } catch (error: any) {
+      return {
+        statuscode: error.statuscode || statuscode.NotImplemented,
+        content: {
+          message: error.message,
+        },
+      };
+    }
+  }
+
+  async getdeletedRestaurant() {
+    try {
+      const result = await Restaurant.find({ isDeleted: true });
+      return {
+        statuscode: statuscode.ok,
+        content: result,
+      };
+    } catch (error: any) {
+      return {
+        statuscode: error.statuscode || statuscode.NotImplemented,
+        content: {
+          message: error.message,
+        },
+      };
+    }
+  }
+
+  async retrievedRestaurant(restaurantData:IretrievedRestaurant ) {
+    try {
+      const restaurant: any = await Restaurant.findOne({
+        restaurantName: restaurantData.restaurantName,
+      });
+      
+      if (
+        restaurantData.USERTYPE == "owner" &&
+        restaurant.restaurantOwner != restaurantData.USERID
+      ) {
+        throw new ApiError(
+          statuscode.NotAcceptable,
+          errorMsg.RestaurantOwner
+        );
+      }
+      const result = await Restaurant.findOneAndUpdate(
+        { restaurantName: restaurantData.restaurantName },
+        {
+          $set: {
+            isDeleted: true,
+          },
+        },
+        { new: true }
+      );
+      return {
+        statuscode: statuscode.ok,
+        content: {
+          message: `${Msg.restaurantRetrieved}`,
+        },
       };
     } catch (error: any) {
       return {
